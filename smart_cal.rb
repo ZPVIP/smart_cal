@@ -108,7 +108,7 @@ end
 
 number_field = nil
 number = Smart_Cal.new
-Shoes.app :height => 250, :width => 200, :resizable => false do
+Shoes.app :height => 300, :width => 200, :resizable => false do
   background "#EEC".."#996", :curve => 5, :margin => 2
 
   stack :margin => 2 do
@@ -118,7 +118,7 @@ Shoes.app :height => 250, :width => 200, :resizable => false do
     end
 
     flow :width => 218, :margin => 4 do
-      %w(7 8 9 / 4 5 6 * 1 2 3 - 0 Clr = +).each do |btn|
+      %w(7 8 9 / 4 5 6 * 1 2 3 - 0 Clr = + / a b c d e f).each do |btn|
         button btn, :width => 46, :height => 46 do
           method = case btn
             when /[0-9]/; 'press_'+btn
@@ -128,6 +128,7 @@ Shoes.app :height => 250, :width => 200, :resizable => false do
             when '-'; 'press_sub'
             when '*'; 'press_times'
             when '/'; 'press_div'
+            when /[a-f]/; 'press_'+btn
           end
           
           number.send(method)
