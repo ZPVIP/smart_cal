@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'fox16'
+require_relative 'smart_cal_base' 
 
 include Fox
 
@@ -65,60 +66,106 @@ class FXTestDialog < FXDialogBox
 
 end
 
+
 # Subclassed main window
-class DialogTester < FXMainWindow
+class SamrtCal < FXMainWindow
 
+  def getwidth(per)
+    @full_width * per / 100 
+  end
+
+  def getheight(per)
+    @full_width * per / 100
+  end
+  
   def initialize(app)
+    @full_width = 600
+    @full_height = 400
     # Invoke base class initialize first
-    super(app, "Dialog Test", :opts => DECOR_ALL, :width => 400, :height => 200)
+    super(app, "Dialog SmartCAL", :opts => DECOR_ALL, :width => @full_width, :height => @full_height)
 
-    # Tooltip
-    FXToolTip.new(getApp())
+    @numbButton = Array.new(10) # 0 -9
+    @hexButton  = Hash.new()  # a- f
+    @opButton   = Hash.new()  # + - x / & |
+    @funcButton = Hash.new()  # cls = back hex bin dec
 
-    # Menubar
-    menubar = FXMenuBar.new(self, LAYOUT_SIDE_TOP|LAYOUT_FILL_X)
-
-    # Separator
-    FXHorizontalSeparator.new(self,
-      LAYOUT_SIDE_TOP|LAYOUT_FILL_X|SEPARATOR_GROOVE)
-
-    # File Menu
-    filemenu = FXMenuPane.new(self)
-    FXMenuCommand.new(filemenu, "&Quit", nil, getApp(), FXApp::ID_QUIT, 0)
-    FXMenuTitle.new(menubar, "&File", nil, filemenu)
 
     # Contents
     contents = FXHorizontalFrame.new(self,
-      LAYOUT_SIDE_TOP|FRAME_NONE|LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
+      LAYOUT_SIDE_TOP|FRAME_NONE|LAYOUT_FILL_X|PACK_UNIFORM_WIDTH)
 
+    # Controls on the right
+    controls = FXVerticalFrame.new(self,
+      LAYOUT_SIDE_RIGHT|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
+
+    @mode = FXLabel.new(contents, "Dec", nil,
+      LAYOUT_SIDE_TOP|JUSTIFY_LEFT)
+    @optionTarget = FXDataTarget.new(1)
+    @input = FXTextField.new(contents, 1, @optionTarget, FXDataTarget::ID_VALUE,
+      (TEXTFIELD_NORMAL|JUSTIFY_RIGHT|LAYOUT_FILL_ROW|LAYOUT_SIDE_TOP|LAYOUT_FILL_X))
     # Button to pop normal dialog
-    nonModalButton = FXButton.new(contents,
-      "&Non-Modal Dialog...\tDisplay normal dialog",
-      :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_CENTER_X|LAYOUT_CENTER_Y)
-    nonModalButton.connect(SEL_COMMAND, method(:onCmdShowDialog))
+    FXHorizontalSeparator.new(self,
+      LAYOUT_NORMAL|LAYOUT_FILL_X|SEPARATOR_GROOVE)
 
-    # Button to pop modal dialog
-    modalButton = FXButton.new(contents,
-      "&Modal Dialog...\tDisplay modal dialog",
-      :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_CENTER_X|LAYOUT_CENTER_Y)
-    modalButton.connect(SEL_COMMAND, method(:onCmdShowDialogModal))
+    matrix = FXMatrix.new(self, 5,
+      MATRIX_BY_COLUMNS|LAYOUT_SIDE_TOP|LAYOUT_FIX_WIDTH, :width => getwidth(55) ) 
 
-    # Build a dialog box
-    @dialog = FXTestDialog.new(self)
+    (0..9).each do |n|
+      @numbButton[n] = FXButton.new(matrix,
+        "#{n}",
+        :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(10))
+      @numbButton[n].connect(SEL_COMMAND, method("press_#{n}".to_sym))
+    end
 
+    ('a'..'f').each do |n|
+      @hexButton[n] = FXButton.new(matrix,
+        "#{n}",
+        :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(10))
+      @hexButton[n].connect(SEL_COMMAND, method("press_#{n}".to_sym))
+    end
+
+    {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/'}.each do |meth, op|
+      @opButton[meth] = FXButton.new(matrix,
+        "#{op}",
+        :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(10))
+      @opButton[meth].connect(SEL_COMMAND, method("press_#{meth}".to_sym))      
+    end
+
+    matrix_right = FXMatrix.new(controls, 2,
+      MATRIX_BY_COLUMNS|LAYOUT_SIDE_TOP)
+
+    # cls back hex bin dec =
+    ['cls', 'back', 'hex', 'bin', 'dec', '='].each do |meth|
+      @funcButton[meth] = FXButton.new(matrix_right,
+        "#{meth}",
+        :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(20))
+      @funcButton[meth].connect(SEL_COMMAND, method("press_#{meth}".to_sym))      
+    end 
   end
 
-  # Show the non-modal dialog
-  def onCmdShowDialog(sender, sel, ptr)
-    @dialog.show
+  (0..9).each do |n|
+    define_method "press_#{n}" do |sender, sel, ptr|
+      puts "test"
+    end
   end
 
-  # Show a modal dialog
-  def onCmdShowDialogModal(sender, sel, ptr)
-    FXTestDialog.new(self).execute
-    return 1
+  ('a'..'f').each do |n|
+    define_method "press_#{n}" do |sender, sel, ptr|
+      puts "test"
+    end
   end
 
+  {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/'}.each do |meth, op|
+    define_method "press_#{meth}" do |sender, sel, ptr|
+      puts "test"
+    end
+  end
+
+  ['cls', '=', 'back', 'hex', 'bin', 'dec'].each do |meth|
+    define_method "press_#{meth}" do |sender, sel, ptr|
+      puts "test"
+    end
+  end
   # Start
   def create
     super
@@ -128,10 +175,10 @@ end
 
 def run
   # Make an application
-  application = FXApp.new("Dialog", "FoxTest")
+  application = FXApp.new("Dialog", "Smart_cal")
 
   # Construct the application's main window
-  DialogTester.new(application)
+  SamrtCal.new(application)
 
   # Create the application
   application.create
