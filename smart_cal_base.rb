@@ -26,6 +26,7 @@ class Fixnum
 end
 
 class Smart_Cal
+attr_accessor :number, :mode
   module OperationType
     HEX = 1
     DEC = 2
@@ -128,8 +129,14 @@ class Smart_Cal
 
   def press_equals
     return if @previous.nil?
+    return if @number.nil?
+    return if @op.nil?
     @number = @previous.send(@op, @number)
     @op = nil
+  end
+
+  def press_back
+    @number = @number / 10
   end
 
 end
