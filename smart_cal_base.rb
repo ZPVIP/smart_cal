@@ -76,7 +76,7 @@ attr_accessor :number, :mode
 
   def bit_on?(name)
     temp = name.gsub("bit", "")
-    if @number.to_bin().chars[temp.to_i] == '1'
+    if @number.to_bin().reverse!.chars[temp.to_i] == '1'
       true
     else
       false

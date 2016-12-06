@@ -28,6 +28,7 @@ class SamrtCal < FXMainWindow
     @hexButton  = Hash.new()  # a- f
     @opButton   = Hash.new()  # + - x / & |
     @funcButton = Hash.new()  # cls = back hex bin dec
+    @bitButton  = Hash.new()
 
 
     matrix_top = FXMatrix.new(self, 1,
@@ -49,7 +50,6 @@ class SamrtCal < FXMainWindow
 
     matrix_mid = FXMatrix.new(self, 2,
     MATRIX_BY_COLUMNS|LAYOUT_FIX_WIDTH, :width => getwidth(100)) 
-
 
     matrix = FXMatrix.new(matrix_mid, 5,
       MATRIX_BY_COLUMNS|LAYOUT_SIDE_TOP|LAYOUT_FIX_WIDTH, :width => getwidth(55) ) 
@@ -82,19 +82,42 @@ class SamrtCal < FXMainWindow
     matrix_right = FXMatrix.new(controls, 2,
       MATRIX_BY_COLUMNS|LAYOUT_FIX_WIDTH, :width => getwidth(40) )
 
-    # cls back hex bin dec =
+    # clear back hex bin dec =
     ['clear', 'back', 'hex', 'bin', 'dec', 'equals'].each do |meth|
       @funcButton[meth] = FXButton.new(matrix_right,
         "#{meth}",
         :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(15))
       @funcButton[meth].connect(SEL_COMMAND, method("press_#{meth}".to_sym))
     end
+
+    #
+    matrix_bits = FXMatrix.new(self, 8,
+    MATRIX_BY_COLUMNS|LAYOUT_FIX_WIDTH, :width => getwidth(100) )
+    (0..63).each do |n|
+       @bitButton[n] = FXCheckButton.new(matrix_bits, "bit#{n}", nil, 0,
+        ICON_BEFORE_TEXT|LAYOUT_SIDE_TOP|LAYOUT_FIX_WIDTH, :width => getwidth(10))
+       if @smart_cal.bit_on?("bit#{n}")
+        @bitButton[n].setCheck(true)
+       end
+    end
+
+  end
+
+  def update_bits
+    (0..63).each do |n|
+      if @smart_cal.bit_on?("bit#{n}")
+        @bitButton[n].setCheck(true)
+      else
+        @bitButton[n].setCheck(false)
+      end
+    end
   end
 
   (0..9).each do |n|
     define_method "press_#{n}" do |sender, sel, ptr|
       @smart_cal.send("press_#{n}")
-      @optionTarget.value = @smart_cal.to_s 
+      @optionTarget.value = @smart_cal.to_s
+      update_bits()
     end
   end
 
@@ -102,6 +125,7 @@ class SamrtCal < FXMainWindow
     define_method "press_#{n}" do |sender, sel, ptr|
       @smart_cal.send("press_#{n}")
       @optionTarget.value = @smart_cal.to_s
+      update_bits()
     end
   end
 
@@ -109,6 +133,7 @@ class SamrtCal < FXMainWindow
     define_method "press_#{meth}" do |sender, sel, ptr|
       @smart_cal.send("press_#{meth}")
       @optionTarget.value = @smart_cal.to_s
+      update_bits()
     end
   end
 
@@ -117,6 +142,7 @@ class SamrtCal < FXMainWindow
       @smart_cal.send("press_#{meth}")
       @optionTarget.value = @smart_cal.to_s
       @mode.text = @smart_cal.mode
+      update_bits()
     end
   end
   # Start
