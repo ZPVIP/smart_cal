@@ -25,6 +25,18 @@ class Fixnum
     end
 end
 
+class Bignum
+    def to_hex
+        self.to_s(16) 
+    end
+    def to_bin
+        self.to_s(2)
+    end
+    def to_dec
+        self.to_s
+    end
+end
+
 class Smart_Cal
 attr_accessor :number, :mode
   module OperationType
@@ -54,7 +66,7 @@ attr_accessor :number, :mode
   def mode
     case @mode
       when OperationType::DEC
-        ""
+        "0d"
       when OperationType::HEX
         "0x"
       when OperationType::BIN

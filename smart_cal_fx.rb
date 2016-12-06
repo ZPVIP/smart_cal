@@ -30,35 +30,39 @@ class SamrtCal < FXMainWindow
     @funcButton = Hash.new()  # cls = back hex bin dec
 
 
+    matrix_top = FXMatrix.new(self, 1,
+    MATRIX_BY_COLUMNS|LAYOUT_SIDE_TOP|LAYOUT_FIX_WIDTH, :width => getwidth(100)) 
     # Contents
-    contents = FXHorizontalFrame.new(self,
-      LAYOUT_SIDE_TOP|FRAME_NONE|LAYOUT_FILL_X)
+    contents = FXHorizontalFrame.new(matrix_top,
+      LAYOUT_SIDE_TOP|FRAME_NONE|LAYOUT_FIX_WIDTH|LAYOUT_FIX_HEIGHT, :width => getwidth(100), :height => getheight(5))
 
-
-    @mode = FXLabel.new(contents, "Dec", nil,
-      LAYOUT_SIDE_TOP| JUSTIFY_LEFT)
-
+    @mode = FXLabel.new(contents, "0d", nil,
+      LAYOUT_SIDE_TOP|JUSTIFY_LEFT|LAYOUT_FIX_WIDTH, :width => getwidth(10))
 
     @optionTarget = FXDataTarget.new(@smart_cal.number)
     @input = FXTextField.new(contents, 1, @optionTarget, FXDataTarget::ID_VALUE,
       (TEXTFIELD_NORMAL|JUSTIFY_RIGHT|LAYOUT_FILL_ROW|LAYOUT_SIDE_TOP|LAYOUT_FILL_X))
     # Button to pop normal dialog
-    FXHorizontalSeparator.new(self,
+
+    FXHorizontalSeparator.new(matrix_top,
       LAYOUT_NORMAL|LAYOUT_FILL_X|SEPARATOR_GROOVE)
 
-        # Controls on the right
-    controls = FXVerticalFrame.new(self,
-      LAYOUT_SIDE_RIGHT|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
+    matrix_mid = FXMatrix.new(self, 2,
+    MATRIX_BY_COLUMNS|LAYOUT_FIX_WIDTH, :width => getwidth(100)) 
 
-    matrix = FXMatrix.new(self, 5,
+
+    matrix = FXMatrix.new(matrix_mid, 5,
       MATRIX_BY_COLUMNS|LAYOUT_SIDE_TOP|LAYOUT_FIX_WIDTH, :width => getwidth(55) ) 
+
+    # Controls on the right
+    controls = FXVerticalFrame.new(matrix_mid,
+      LAYOUT_SIDE_RIGHT)
 
     (0..9).each do |n|
       @numbButton[n] = FXButton.new(matrix,
         "#{n}",
         :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(10))
       @numbButton[n].connect(SEL_COMMAND, method("press_#{n}".to_sym))
-      @optionTarget = @smart_cal.number.to_s
     end
 
     ('a'..'f').each do |n|
@@ -66,56 +70,53 @@ class SamrtCal < FXMainWindow
         "#{n}",
         :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(10))
       @hexButton[n].connect(SEL_COMMAND, method("press_#{n}".to_sym))
-      @optionTarget = @smart_cal.number.to_s
     end
 
     {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/'}.each do |meth, op|
       @opButton[meth] = FXButton.new(matrix,
         "#{op}",
         :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(10))
-      @opButton[meth].connect(SEL_COMMAND, method("press_#{meth}".to_sym))   
-      @optionTarget = @smart_cal.number.to_s  
+      @opButton[meth].connect(SEL_COMMAND, method("press_#{meth}".to_sym))    
     end
 
     matrix_right = FXMatrix.new(controls, 2,
-      MATRIX_BY_COLUMNS|LAYOUT_SIDE_TOP)
+      MATRIX_BY_COLUMNS|LAYOUT_FIX_WIDTH, :width => getwidth(40) )
 
     # cls back hex bin dec =
-    ['cls', 'back', 'hex', 'bin', 'dec', 'equals'].each do |meth|
+    ['clear', 'back', 'hex', 'bin', 'dec', 'equals'].each do |meth|
       @funcButton[meth] = FXButton.new(matrix_right,
         "#{meth}",
-        :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(20))
+        :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(15))
       @funcButton[meth].connect(SEL_COMMAND, method("press_#{meth}".to_sym))
-      @optionTarget = @smart_cal.number.to_s
-      @mode.text = @smart_cal.mode 
     end
   end
 
   (0..9).each do |n|
     define_method "press_#{n}" do |sender, sel, ptr|
       @smart_cal.send("press_#{n}")
-      @optionTarget = @smart_cal.number.to_s 
+      @optionTarget.value = @smart_cal.to_s 
     end
   end
 
   ('a'..'f').each do |n|
     define_method "press_#{n}" do |sender, sel, ptr|
       @smart_cal.send("press_#{n}")
-      @optionTarget = @smart_cal.number.to_s
+      @optionTarget.value = @smart_cal.to_s
     end
   end
 
   {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/'}.each do |meth, op|
     define_method "press_#{meth}" do |sender, sel, ptr|
       @smart_cal.send("press_#{meth}")
-      @optionTarget = @smart_cal.number.to_s
+      @optionTarget.value = @smart_cal.to_s
     end
   end
 
-  ['cls', 'equals', 'back', 'hex', 'bin', 'dec'].each do |meth|
+  ['clear', 'equals', 'back', 'hex', 'bin', 'dec'].each do |meth|
     define_method "press_#{meth}" do |sender, sel, ptr|
       @smart_cal.send("press_#{meth}")
-      @optionTarget = @smart_cal.number.to_s
+      @optionTarget.value = @smart_cal.to_s
+      @mode.text = @smart_cal.mode
     end
   end
   # Start
