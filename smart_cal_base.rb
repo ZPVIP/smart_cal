@@ -63,6 +63,40 @@ attr_accessor :number, :mode
     end
   end
 
+  def set_number(str)
+    case @mode
+      when OperationType::DEC
+        @number = str.from_dec
+      when OperationType::HEX
+        @number = str.from_hex
+      when OperationType::BIN
+        @number = str.from_bin
+    end
+  end
+
+  def verify_data(str)
+    case @mode
+      when OperationType::DEC
+        if str =~ /^[0-9]*$/
+          return true
+        else
+          return false
+        end
+      when OperationType::HEX
+        if str =~ /^[a-f|A-F|0-9]*$/
+          return true
+        else
+          return false
+        end
+      when OperationType::BIN
+        if str =~ /^[0-1]*$/
+          return true
+        else
+          return false
+        end
+    end
+  end
+
   def mode
     case @mode
       when OperationType::DEC

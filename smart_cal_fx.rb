@@ -43,6 +43,9 @@ class SamrtCal < FXMainWindow
     @optionTarget = FXDataTarget.new(@smart_cal.number)
     @input = FXTextField.new(contents, 1, @optionTarget, FXDataTarget::ID_VALUE,
       (TEXTFIELD_NORMAL|JUSTIFY_RIGHT|LAYOUT_FILL_ROW|LAYOUT_SIDE_TOP|LAYOUT_FILL_X))
+    @optionTarget.connect(SEL_CHANGED, method("update_input".to_sym))
+    #@input.connect(SEL_VERIFY, method("verify_data".to_sym))
+
     # Button to pop normal dialog
 
     FXHorizontalSeparator.new(matrix_top,
@@ -104,6 +107,22 @@ class SamrtCal < FXMainWindow
 
   end
 
+  def verify_data(sender, sel, tentative)
+     #reverse the logical for fxruby
+     !@smart_cal.verify_data(tentative.strip)
+  end
+
+  def update_input(sender, sel, tentative)
+    @input.text = "0" if tentative.nil?
+    if !@smart_cal.verify_data(tentative.to_s.strip)
+      tentative = @smart_cal.to_s
+      @input.text = tentative
+      return
+    end
+    @smart_cal.set_number(tentative.to_s.strip)
+    update_bits()
+  end
+
   def update_bits
     (0..63).each do |n|
       if @smart_cal.bit_on?("bit#{n}")
@@ -140,6 +159,7 @@ class SamrtCal < FXMainWindow
       update_bits()
     end
   end
+
 
   {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/'}.each do |meth, op|
     define_method "press_#{meth}" do |sender, sel, ptr|
