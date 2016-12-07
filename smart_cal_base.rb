@@ -157,7 +157,7 @@ attr_accessor :number, :mode
     @number = 0
   end
 
-  {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/'}.each do |meth, op|
+  {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/', 'and' => '&', 'or' => '|'}.each do |meth, op|
     define_method "press_#{meth}" do
      if @op
         press_equals

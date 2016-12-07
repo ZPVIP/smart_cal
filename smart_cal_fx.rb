@@ -75,7 +75,7 @@ class SamrtCal < FXMainWindow
       @hexButton[n].connect(SEL_COMMAND, method("press_#{n}".to_sym))
     end
 
-    {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/'}.each do |meth, op|
+    {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/', 'and' => '&&', 'or' => '|'}.each do |meth, op|
       @opButton[meth] = FXButton.new(matrix,
         "#{op}",
         :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(10))
@@ -86,11 +86,11 @@ class SamrtCal < FXMainWindow
       MATRIX_BY_COLUMNS|LAYOUT_FIX_WIDTH, :width => getwidth(40) )
 
     # clear back hex bin dec =
-    ['clear', 'back', 'hex', 'bin', 'dec', 'equals'].each do |meth|
+    {'clear' => 'clear', 'back' => 'back', 'hex' => 'hex', 'bin' => 'bin', 'dec' => 'dec', '=' => 'equals'}.each do |meth, op|
       @funcButton[meth] = FXButton.new(matrix_right,
         "#{meth}",
         :opts => FRAME_RAISED|FRAME_THICK|LAYOUT_NORMAL|JUSTIFY_CENTER_X|LAYOUT_FIX_WIDTH, :width => getwidth(15))
-      @funcButton[meth].connect(SEL_COMMAND, method("press_#{meth}".to_sym))
+      @funcButton[meth].connect(SEL_COMMAND, method("press_#{op}".to_sym))
     end
 
     #
@@ -113,10 +113,14 @@ class SamrtCal < FXMainWindow
   end
 
   def update_input(sender, sel, tentative)
-    @input.text = "0" if tentative.nil?
+    return if tentative.nil?
+    if !@smart_cal.verify_data(@input.text.to_s.strip)
+      @input.text = "0"
+    end
     if !@smart_cal.verify_data(tentative.to_s.strip)
       tentative = @smart_cal.to_s
       @input.text = tentative
+      puts "reject old data"
       return
     end
     @smart_cal.set_number(tentative.to_s.strip)
@@ -161,7 +165,7 @@ class SamrtCal < FXMainWindow
   end
 
 
-  {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/'}.each do |meth, op|
+  {'add' => '+', 'sub' => '-', 'times' => '*', 'div' => '/', 'and' => '\&', 'or' => '|'}.each do |meth, op|
     define_method "press_#{meth}" do |sender, sel, ptr|
       @smart_cal.send("press_#{meth}")
       @optionTarget.value = @smart_cal.to_s
