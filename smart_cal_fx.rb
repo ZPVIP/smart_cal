@@ -18,8 +18,8 @@ class SamrtCal < FXMainWindow
   end
   
   def initialize(app)
-    @full_width = 600
-    @full_height = 400
+    @full_width = 620
+    @full_height = 420
     @smart_cal = Smart_Cal.new
     # Invoke base class initialize first
     super(app, "SmartCAL", :opts => DECOR_ALL, :width => @full_width, :height => @full_height)
@@ -96,6 +96,7 @@ class SamrtCal < FXMainWindow
     (0..63).each do |n|
        @bitButton[n] = FXCheckButton.new(matrix_bits, "bit#{n}", nil, 0,
         ICON_BEFORE_TEXT|LAYOUT_SIDE_TOP|LAYOUT_FIX_WIDTH, :width => getwidth(10))
+       @bitButton[n].connect(SEL_COMMAND, method("press_bit#{n}".to_sym))
        if @smart_cal.bit_on?("bit#{n}")
         @bitButton[n].setCheck(true)
        end
@@ -112,6 +113,17 @@ class SamrtCal < FXMainWindow
       end
     end
   end
+
+  (0..63).each do |n|
+    define_method "press_bit#{n}" do |sender, sel, ptr|
+      if @bitButton[n].checked?
+        @smart_cal.send("set_bit","bit#{n}")
+      else 
+        @smart_cal.send("cls_bit","bit#{n}")
+      end
+      @optionTarget.value = @smart_cal.to_s
+    end
+  end  
 
   (0..9).each do |n|
     define_method "press_#{n}" do |sender, sel, ptr|

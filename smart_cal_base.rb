@@ -75,6 +75,7 @@ attr_accessor :number, :mode
   end
 
   def bit_on?(name)
+    return if @number.nil?
     temp = name.gsub("bit", "")
     if @number.to_bin().reverse!.chars[temp.to_i] == '1'
       true
@@ -83,9 +84,14 @@ attr_accessor :number, :mode
     end
   end
 
-  def add_bit(name)
+  def set_bit(name)
      temp = name.gsub("bit", "")
-     @number = @number + temp + 1
+     @number = @number + (1<<temp.to_i)
+  end
+
+  def cls_bit(name)
+     temp = name.gsub("bit", "")
+     @number = @number - (1<<temp.to_i)
   end
 
   
